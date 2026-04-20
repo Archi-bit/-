@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Список задач</h2>
+
+<!-- ФИЛЬТРЫ -->
+<form method="get">
+    <div class="row mb-3">
+
+        <!-- КАТЕГОРИИ -->
+        <div class="col-md-3">
+            <select name="category" class="form-select">
+                <option value="">Все категории</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}"
+                    {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- ПОИСК -->
+        <div class="col-md-3">
+            <input type="text" name="search" placeholder="Поиск по названию"
+                   class="form-control"
+                   value="{{ request.GET.search }}">
+        </div>
+
+        <!-- СТАТУС -->
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">Все</option>
+                <option value="done" {% if request.GET.status == "done" %}selected{% endif %}>Выполненные</option>
+                <option value="undone" {% if request.GET.status == "undone" %}selected{% endif %}>Не выполненные</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100" type="submit">Фильтровать</button>
+        </div>
+
+    </div>
+</form>
+
+<!-- СПИСОК -->
+<ul class="list-group">
+
+    {% for task in tasks %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+
+        <div>
+            {% if task.completed %}
+                <s>
+                    <a href="{% url 'task_detail' task.pk %}">{{ task.title }}</a>
+                </s>
+            {% else %}
+                <a href="{% url 'task_detail' task.pk %}">{{ task.title }}</a>
+            {% endif %}
+
+            <span class="text-muted">({{ task.category.name }})</span>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <!-- ВЫПОЛНЕНО / НЕ ВЫПОЛНЕНО -->
+            <a href="{% url 'task_complete' task.pk %}" class="btn btn-success btn-sm">
+                ✔
+            </a>
+
+            <!-- УДАЛЕНИЕ -->
+            <a href="{% url 'task_delete' task.pk %}"
+               class="btn btn-danger btn-sm"
+               onclick="return confirm('Удалить задачу?')">
+                🗑️
+            </a>
+
+        </div>
+
+    </li>
+    {% empty %}
+    <li class="list-group-item">Нет задач</li>
+    {% endfor %}
+
+</ul>
+
+{% endblock %}
